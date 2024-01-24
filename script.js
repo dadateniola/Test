@@ -56,7 +56,7 @@ class Slider {
     }
 
     animate() {
-        const tl = gsap.timeline({ defaults: { duration: 2.8, ease: "Expo.easeInOut" } });
+        const tl = gsap.timeline({ defaults: { duration: 3, ease: "Expo.easeInOut" } });
 
         const activeSlide = select(".slide.active");
         const activeImg = selectWith(activeSlide, "img");
