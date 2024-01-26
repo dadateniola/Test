@@ -13,13 +13,20 @@ class Slider {
     }
 
     conditions() {
-        if (!this?.amount) this.amount = 1;
-
         if (!this?.gap) this.gap = 0;
+        if(!this?.motion) this.motion = 30;
 
         if (!this?.slider) return false;
 
-        return this.slider instanceof HTMLElement;
+        this.amount = 0;
+        this.toFixed = 3;
+
+        if (this.slider instanceof HTMLElement) {
+            this.slides = selectAllWith(this.slider, "*");
+            this.amount = this.slides.length + 1;
+
+            return true;
+        } else return false;
     }
 
     init() {
@@ -42,34 +49,52 @@ class Slider {
     setupSlides() {
         //Don't edit the code under this function
         this.fullWidth = 100 * this.amount;
-        this.slideWidth = 100 / this.amount;
+        this.slideWidth = parseFloat((100 / this.amount).toFixed(this.toFixed));
 
-        Slider.insertToDOM({ type: "div", parent: this.slider, classes: 'slider', properties: { width: `calc(${this.fullWidth}% + ${this.gap * this.amount}px)` } });
+        Slider.insertToDOM({
+            type: "div",
+            parent: this.slider,
+            classes: 'slider',
+            properties: { width: `calc(${this.fullWidth}% + ${this.gap * this.amount}px)` }
+        });
 
-        for (let i = 1; i <= this.amount; i++) {
-            const slide = Slider.insertToDOM({ type: "div", parent: select(".slider"), classes: (i == 1) ? ['slide', 'active'] : 'slide', properties: { width: `calc(${this.slideWidth}% - ${this.gap}px)`, marginLeft: (i > 1) ? `${this.gap}px` : 0 } });
-            Slider.insertToDOM({ type: "img", text: `./img/img (${i}).jpg`, parent: slide });
-        }
+        this.slides.forEach((elem, i) => {
+            Slider.insertToDOM({
+                type: "div",
+                append: elem.cloneNode(true),
+                parent: select(".slider"),
+                classes: (i == 0) ? ['slide', 'active'] : 'slide',
+                properties: { width: `calc(${this.slideWidth}% - ${this.gap}px)`, marginLeft: (i > 0) ? `${this.gap}px` : 0 }
+            });
 
-        const slide = Slider.insertToDOM({ type: "div", parent: select(".slider"), classes: ['slide', 'end'], properties: { width: `calc(${this.slideWidth}% - ${this.gap}px)`, marginLeft: `${this.gap}px` } });
-        Slider.insertToDOM({ type: "img", text: `./img/img (1).jpg`, parent: slide });
+            elem.remove();
+        })
+
+        //Replicate the first slide after the last slide
+        Slider.insertToDOM({
+            type: "div",
+            append: this.slides[0].cloneNode(true),
+            parent: select(".slider"),
+            classes: ['slide', 'end'],
+            properties: { width: `calc(${this.slideWidth}% - ${this.gap}px)`, marginLeft: `${this.gap}px` }
+        });
     }
 
     animate() {
-        const tl = gsap.timeline({ defaults: { duration: 3, ease: "Expo.easeInOut" } });
+        const tl = gsap.timeline({ defaults: { duration: 4, ease: "Expo.easeInOut" } });
 
         const activeSlide = select(".slide.active");
-        const activeImg = selectWith(activeSlide, "img");
+        const activeImg = selectWith(activeSlide, "*");
         const nextSlide = activeSlide?.nextElementSibling;
-        const nextImg = selectWith(nextSlide, "img");
+        const nextImg = selectWith(nextSlide, "*");
 
         const slider = select(".slider");
-        const width = parseInt(slider.dataset?.width) || this.slideWidth;
-
+        const width = parseFloat(slider.dataset?.width) || this.slideWidth;
+        
         tl
-            .set(nextImg, { xPercent: -30 })
+            .set(nextImg, { xPercent: -this.motion })
             .to(slider, { xPercent: -width, delay: 0.8 })
-            .to(activeImg, { xPercent: 30, clearProps: "transform" }, "<")
+            .to(activeImg, { xPercent: this.motion, clearProps: "transform" }, "<")
             .to(nextImg, { xPercent: 0 }, "<")
             .call(() => {
                 if (nextSlide.classList.contains("end")) {
@@ -79,7 +104,7 @@ class Slider {
                     activeSlide.classList?.remove("active");
                     selectAll(".slide")[0].classList.add("active");
                 } else {
-                    slider.dataset.width = width + this.slideWidth;
+                    slider.dataset.width = (width + this.slideWidth).toFixed(this.toFixed);
 
                     activeSlide.classList?.remove("active");
                     nextSlide.classList?.add("active");
@@ -94,16 +119,18 @@ class Slider {
         if (this.imagesLoaded === this.images.length) {
             console.log("All images loaded");
 
-            gsap.to(".slider", { opacity: 1, delay: 1, onComplete: () => {
-                select("main").classList.add("stop");
-                this.animate();
-            }});
+            gsap.to(".slider", {
+                opacity: 1, delay: 1, onComplete: () => {
+                    select("main").classList.add("stop");
+                    this.animate();
+                }
+            });
         }
     }
 
     //Static Methods
     static insertToDOM(params = {}) {
-        const { type, text, parent, before, classes, properties } = params;
+        const { type, text, append, parent, before, classes, properties } = params;
 
         if (!type || !parent) return null;
 
@@ -113,6 +140,11 @@ class Slider {
         if (text) {
             if (type == "img") element.src = text;
             else element.innerHTML = text;
+        }
+
+        //Append an HTML element instead of a text
+        if (append) {
+            element.appendChild(append);
         }
 
         //Add classes
@@ -143,5 +175,5 @@ class Slider {
 }
 
 window.onload = () => {
-    new Slider({ slider: select("main"), amount: 5, gap: 20 });
+    new Slider({ slider: select("main"), gap: 15 });
 }
