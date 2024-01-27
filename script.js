@@ -15,6 +15,8 @@ class Slider {
     conditions() {
         if (!this?.gap) this.gap = 0;
         if(!this?.motion) this.motion = 30;
+        if(!this?.delay) this.delay = 0.8;
+        if(!this?.duration) this.duration = 4;
 
         if (!this?.slider) return false;
 
@@ -81,7 +83,7 @@ class Slider {
     }
 
     animate() {
-        const tl = gsap.timeline({ defaults: { duration: 4, ease: "Expo.easeInOut" } });
+        const tl = gsap.timeline({ defaults: { duration: this.duration, ease: "Expo.easeInOut" } });
 
         const activeSlide = select(".slide.active");
         const activeImg = selectWith(activeSlide, "*");
@@ -93,7 +95,7 @@ class Slider {
         
         tl
             .set(nextImg, { xPercent: -this.motion })
-            .to(slider, { xPercent: -width, delay: 0.8 })
+            .to(slider, { xPercent: -width, delay: this?.delay })
             .to(activeImg, { xPercent: this.motion, clearProps: "transform" }, "<")
             .to(nextImg, { xPercent: 0 }, "<")
             .call(() => {
@@ -177,3 +179,11 @@ class Slider {
 window.onload = () => {
     new Slider({ slider: select("main"), gap: 15 });
 }
+
+// Slider parameters {
+//     slider: Element to hold the slider
+//     motion: The level of counter movement between the slides children
+//     gap: Space between the slides
+//     delay: time before each animation starts
+//     duration: time for each animation
+// }
