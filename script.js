@@ -213,12 +213,32 @@ class Notice {
     }
 
     init() {
-        select(".notice-btns button[data-next]").addEventListener("click",  () => this.animate("next"));
-        select(".notice-btns button[data-prev]").addEventListener("click",  () => this.animate("prev"));
+        select(".notice-btns button[data-next]").addEventListener("click", () => this.animate("next"));
+        select(".notice-btns button[data-prev]").addEventListener("click", () => this.animate("prev"));
+
+        selectAll(".notice-slider img").forEach(img => {
+            Slider.insertToDOM({
+                type: "div",
+                append: img.cloneNode(true),
+                parent: img.parentNode,
+                classes: "pfp",
+                before: img
+            })
+
+            img.remove();
+        })
+
+        selectAll(".notice-slider img").forEach(image => {
+            if (image.complete) {
+                image.parentNode.classList.add("off");
+            } else {
+                image.parentNode.classList.add("off");
+            }
+        })
     }
 
     animate(direction = null) {
-        if(!direction) return;
+        if (!direction) return;
 
         const isNext = (direction == "next") ? true : false;
 
@@ -234,17 +254,17 @@ class Notice {
         const nextNotice = isNext ? activeNotice.nextElementSibling : activeNotice.previousElementSibling;
 
         if (!nextNotice || nextNotice?.hasAttribute("data-space")) return disableLinksAndBtns();
-        
+
         const nextMessage = selectWith(nextNotice, ".notice-message");
         const nextSpan = selectWith(nextNotice, "span");
-        
+
         const current = parseInt(this.slider?.dataset?.distance) || 0;
         const height = 110;
         const distance = isNext ? (current - height) : (current + height);
 
         tl
             .to([message.children, nextMessage.children, nextSpan, span], { opacity: 0 })
-            .to(this.slider, { y: isNext ? distance : distance  })
+            .to(this.slider, { y: isNext ? distance : distance })
             .to([message, nextMessage], { width: 40, height: 40 }, "<")
             .to(activeNotice, { height: `${height}px` }, "<")
             .to(nextNotice, { height: `calc(100vh - (2 * var(--notice-height)))` }, "<")
@@ -262,7 +282,7 @@ class Notice {
             .call(() => {
                 disableLinksAndBtns();
             })
-        }
+    }
 }
 
 window.onload = () => {
