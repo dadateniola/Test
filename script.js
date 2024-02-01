@@ -6,6 +6,36 @@ const create = (e) => document.createElement(e);
 const root = (e) => getComputedStyle(select(":root")).getPropertyValue(e);
 const getStyle = (e, style) => window.getComputedStyle(e)[style];
 
+const preventDefault = (event) => event.preventDefault();
+const disableLinksAndBtns = (condition = false) => {
+    selectAll('a, button').forEach((element) => {
+        if (condition) {
+            element.setAttribute('disabled', 'true');
+
+            if (element.tagName === 'A') {
+                element.dataset.href = element.href;
+                element.addEventListener('click', preventDefault);
+            }
+        } else {
+            selectAll('a, button').forEach((element) => {
+                element.removeAttribute('disabled');
+
+                if (element.tagName === 'A') {
+                    element.setAttribute('href', element.dataset.href);
+                    element.removeEventListener('click', preventDefault);
+                }
+            });
+        }
+    });
+}
+
+// Slider parameters {
+//     slider: Element to hold the slider
+//     motion: The level of counter movement between the slides children
+//     gap: Space between the slides
+//     delay: time before each animation starts
+//     duration: time for each animation
+// }
 class Slider {
     constructor(params = {}) {
         Object.assign(this, params);
@@ -14,9 +44,9 @@ class Slider {
 
     conditions() {
         if (!this?.gap) this.gap = 0;
-        if(!this?.motion) this.motion = 30;
-        if(!this?.delay) this.delay = 0.8;
-        if(!this?.duration) this.duration = 4;
+        if (!this?.motion) this.motion = 30;
+        if (!this?.delay) this.delay = 0.8;
+        if (!this?.duration) this.duration = 4;
 
         if (!this?.slider) return false;
 
@@ -92,7 +122,7 @@ class Slider {
 
         const slider = select(".slider");
         const width = parseFloat(slider.dataset?.width) || this.slideWidth;
-        
+
         tl
             .set(nextImg, { xPercent: -this.motion })
             .to(slider, { xPercent: -width, delay: this?.delay })
@@ -176,14 +206,68 @@ class Slider {
     }
 }
 
-window.onload = () => {
-    new Slider({ slider: select("main"), gap: 15 });
+class Notice {
+    constructor(params = {}) {
+        Object.assign(this, params);
+        this.init();
+    }
+
+    init() {
+        select(".notice-btns button[data-next]").addEventListener("click",  () => this.animate("next"));
+        select(".notice-btns button[data-prev]").addEventListener("click",  () => this.animate("prev"));
+    }
+
+    animate(direction = null) {
+        if(!direction) return;
+
+        const isNext = (direction == "next") ? true : false;
+
+        disableLinksAndBtns(true);
+
+        const tl = gsap.timeline();
+        this.slider = select(".notice-slider");
+
+        const activeNotice = selectWith(this.slider, ".notice.active");
+        const message = selectWith(activeNotice, ".notice-message")
+        const span = selectWith(activeNotice, "span");
+
+        const nextNotice = isNext ? activeNotice.nextElementSibling : activeNotice.previousElementSibling;
+
+        if (!nextNotice || nextNotice?.hasAttribute("data-space")) return disableLinksAndBtns();
+        
+        const nextMessage = selectWith(nextNotice, ".notice-message");
+        const nextSpan = selectWith(nextNotice, "span");
+        
+        const current = parseInt(this.slider?.dataset?.distance) || 0;
+        const height = 110;
+        const distance = isNext ? (current - height) : (current + height);
+
+        tl
+            .to([message.children, nextMessage.children, nextSpan, span], { opacity: 0 })
+            .to(this.slider, { y: isNext ? distance : distance  })
+            .to([message, nextMessage], { width: 40, height: 40 }, "<")
+            .to(activeNotice, { height: `${height}px` }, "<")
+            .to(nextNotice, { height: `calc(100vh - (2 * var(--notice-height)))` }, "<")
+
+            .to(nextSpan, { width: 0 }, "<")
+            .to(span, { width: "auto", opacity: 1 }, "<")
+            .call(() => {
+                this.slider.dataset.distance = distance;
+                activeNotice.classList.remove("active");
+                nextNotice.classList.add("active");
+            }, null, "<")
+            .to([message, nextMessage], { width: "auto" })
+            .to([message, nextMessage], { height: "auto" })
+            .to([message.children, nextMessage.children], { opacity: 1 }, "<")
+            .call(() => {
+                disableLinksAndBtns();
+            })
+        }
 }
 
-// Slider parameters {
-//     slider: Element to hold the slider
-//     motion: The level of counter movement between the slides children
-//     gap: Space between the slides
-//     delay: time before each animation starts
-//     duration: time for each animation
-// }
+window.onload = () => {
+    const type = select("main")?.dataset?.type;
+
+    if (type == "slider") new Slider({ slider: select("main"), gap: 15 });
+    if (type == "notice") new Notice({ slider: select("main"), gap: 15 });
+} 
