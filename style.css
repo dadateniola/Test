@@ -146,6 +146,10 @@ main[data-type="notice"] {
     opacity: 0;
 }
 
+.pfp.off {
+    background-color: transparent;
+}
+
 .pfp.off img {
     opacity: 1;
 }

@@ -215,26 +215,6 @@ class Notice {
     init() {
         select(".notice-btns button[data-next]").addEventListener("click", () => this.animate("next"));
         select(".notice-btns button[data-prev]").addEventListener("click", () => this.animate("prev"));
-
-        selectAll(".notice-slider img").forEach(img => {
-            Slider.insertToDOM({
-                type: "div",
-                append: img.cloneNode(true),
-                parent: img.parentNode,
-                classes: "pfp",
-                before: img
-            })
-
-            img.remove();
-        })
-
-        selectAll(".notice-slider img").forEach(image => {
-            if (image.complete) {
-                image.parentNode.classList.add("off");
-            } else {
-                image.parentNode.classList.add("off");
-            }
-        })
     }
 
     animate(direction = null) {
@@ -289,5 +269,27 @@ window.onload = () => {
     const type = select("main")?.dataset?.type;
 
     if (type == "slider") new Slider({ slider: select("main"), gap: 15 });
-    if (type == "notice") new Notice({ slider: select("main"), gap: 15 });
+    if (type == "notice") {
+        selectAll(".notice-slider img").forEach(img => {
+            Slider.insertToDOM({
+                type: "div",
+                append: img.cloneNode(true),
+                parent: img.parentNode,
+                classes: "pfp",
+                before: img
+            })
+
+            img.remove();
+        })
+
+        selectAll(".notice-slider img").forEach(image => {
+            if (image.complete) {
+                image.parentNode.classList.add("off");
+            } else {
+                image.parentNode.classList.add("off");
+            }
+        })
+
+        new Notice({ slider: select("main"), gap: 15 })
+    };
 } 
