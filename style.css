@@ -323,11 +323,20 @@ main[data-type="notice"] {
 
     .notice-btns {
         transform: none;
-        bottom: 30px;
+        bottom: 35px;
+        gap: 10px
+    }
+
+    .notice.active {
+        gap: 0;
     }
 
     .notice span {
         display: none;
+    }
+
+    .pfp.off {
+        width: 0px;
     }
 }
 
