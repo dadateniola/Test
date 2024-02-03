@@ -245,18 +245,18 @@ class Notice {
         tl
             .to([message.children, nextMessage.children, nextSpan, span], { opacity: 0 })
             .to(this.slider, { y: isNext ? distance : distance })
-            .to([message, nextMessage], { width: 40, height: 40 }, "<")
+            .to([message, nextMessage], { width: 40, height: 40, ease: "Power1.easeOut" }, "<")
             .to(activeNotice, { height: `${height}px` }, "<")
             .to(nextNotice, { height: `calc(100vh - (2 * var(--notice-height)))` }, "<")
 
             .to(nextSpan, { width: 0 }, "<")
-            .to(span, { width: "auto", opacity: 1 }, "<")
+            .to(span, { width: 80, opacity: 1 }, "<")
             .call(() => {
                 this.slider.dataset.distance = distance;
                 activeNotice.classList.remove("active");
                 nextNotice.classList.add("active");
             }, null, "<")
-            .to([message, nextMessage], { width: "auto" })
+            .to([message, nextMessage], { width: "auto", ease: "Power1.easeInOut" })
             .to([message, nextMessage], { height: "auto" })
             .to([message.children, nextMessage.children], { opacity: 1 }, "<")
             .call(() => {

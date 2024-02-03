@@ -128,7 +128,7 @@ main.stop {
 }
 
 main[data-type="notice"] {
-    padding: 0 200px;
+    padding: 0 20vw;
     background-color: #F5F7FA;
 
     overflow-x: hidden;
@@ -263,11 +263,14 @@ main[data-type="notice"] {
 
 .notice-btns button {
     padding: 10px;
-    border: none;
     border-radius: 10px;
     background-color: white;
     border: 2px solid #F5F7FA;
     transition: 0.3s;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .notice-btns button:first-child img {
@@ -323,7 +326,7 @@ main[data-type="notice"] {
 
     .notice-btns {
         transform: none;
-        bottom: 35px;
+        bottom: 50px;
         gap: 10px
     }
 
